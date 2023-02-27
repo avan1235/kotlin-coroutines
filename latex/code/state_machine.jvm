@@ -1,0 +1,36 @@
+class <anonymous_for_state_machine> extends SuspendLambda<...> {
+    // current state of the state machine
+    int label = 0
+
+    // local variables of the coroutine
+    A a = null
+    Y y = null
+
+    void resumeWith(Object result) {
+        if (label == 0) goto L0
+        if (label == 1) goto L1
+        if (label == 2) goto L2
+        else throw IllegalStateException()
+        // each label code
+        // local variables and state switch
+      L0:
+        // result is expected to be `null` at this invocation
+        a = a()
+        label = 1
+        result = foo(a).await(this) // 'this' is passed as a continuation
+        if (result == COROUTINE_SUSPENDED) return // return if await had suspended
+      L1:
+        // external code has resumed this coroutine passing the result of .await()
+        y = (Y) result
+        b()
+        label = 2
+        result = bar(a, y).await(this) // 'this' is passed as a continuation
+        if (result == COROUTINE_SUSPENDED) return // return if await had suspended
+      L2:
+        // external code has resumed this coroutine passing the result of .await()
+        Z z = (Z) result
+        c(z)
+        label = -1 // No more steps are allowed
+        return
+    }
+}
